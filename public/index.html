@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice AI Agent — Gemini 3.1 Flash Live</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #06080c;
+            --surface: #0e1117;
+            --border: #1c2030;
+            --border-bright: #2a3050;
+            --text: #c8cdd8;
+            --text-dim: #5a6178;
+            --accent: #00e5a0;
+            --accent-glow: rgba(0, 229, 160, 0.15);
+            --danger: #ff4d6a;
+            --blue: #4d9fff;
+            --radius: 14px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(ellipse at 30% 20%, rgba(0, 229, 160, 0.04) 0%, transparent 50%),
+                        radial-gradient(ellipse at 70% 80%, rgba(77, 159, 255, 0.03) 0%, transparent 50%);
+            z-index: -1;
+            pointer-events: none;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .logo {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            opacity: 0.8;
+        }
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #fff;
+            letter-spacing: -0.02em;
+        }
+        .subtitle {
+            color: var(--text-dim);
+            font-size: 0.82rem;
+            margin-top: 0.3rem;
+            font-weight: 300;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 540px;
+        }
+
+        /* Orb */
+        .orb-wrap {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        .orb {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 40%, #1a2030, #0e1117);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .orb.listening {
+            border-color: var(--accent);
+            box-shadow: 0 0 40px var(--accent-glow), 0 0 80px rgba(0, 229, 160, 0.06);
+        }
+        .orb.listening .orb-inner {
+            transform: scale(1.1);
+            background: var(--accent);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        .orb.speaking .orb-inner {
+            background: var(--blue);
+            box-shadow: 0 0 20px rgba(77, 159, 255, 0.3);
+            animation: pulse-speak 0.8s ease-in-out infinite alternate;
+        }
+        .orb.speaking {
+            border-color: var(--blue);
+            box-shadow: 0 0 40px rgba(77, 159, 255, 0.1);
+        }
+        .orb-inner {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--text-dim);
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        @keyframes pulse-speak {
+            from { transform: scale(1); }
+            to { transform: scale(1.35); }
+        }
+
+        .status-badge {
+            text-align: center;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            color: var(--text-dim);
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+        }
+        .status-badge.active { color: var(--accent); }
+        .status-badge.error { color: var(--danger); }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 0.6rem;
+            margin-bottom: 1.2rem;
+        }
+        button {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--surface);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.01em;
+        }
+        button:hover:not(:disabled) {
+            background: #151922;
+            border-color: var(--border-bright);
+        }
+        button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        button.primary {
+            background: var(--accent);
+            color: var(--bg);
+            border-color: var(--accent);
+            font-weight: 600;
+        }
+        button.primary:hover:not(:disabled) {
+            background: #00ffb2;
+        }
+        button.stop {
+            background: rgba(255, 77, 106, 0.1);
+            border-color: rgba(255, 77, 106, 0.3);
+            color: var(--danger);
+        }
+        button.stop:hover:not(:disabled) {
+            background: rgba(255, 77, 106, 0.18);
+        }
+
+        /* Text input */
+        .text-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.2rem;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 0.7rem 0.85rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus {
+            border-color: var(--border-bright);
+        }
+        input[type="text"]::placeholder {
+            color: var(--text-dim);
+        }
+
+        /* Transcript */
+        .transcript-label {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 0.5rem;
+        }
+        .transcript {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            min-height: 200px;
+            max-height: 350px;
+            overflow-y: auto;
+            font-size: 0.84rem;
+            line-height: 1.7;
+        }
+        .transcript::-webkit-scrollbar { width: 4px; }
+        .transcript::-webkit-scrollbar-track { background: transparent; }
+        .transcript::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+        .msg { margin-bottom: 0.6rem; }
+        .msg .role {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 500;
+            margin-right: 0.5rem;
+            letter-spacing: 0.04em;
+        }
+        .msg .role.user { color: var(--blue); }
+        .msg .role.agent { color: var(--accent); }
+        .msg .role.system { color: var(--text-dim); }
+        .msg .role.tool { color: #f0a030; }
+
+        /* Tool calls */
+        .tool-msg {
+            background: rgba(240, 160, 48, 0.06);
+            border: 1px solid rgba(240, 160, 48, 0.15);
+            border-radius: 8px;
+            padding: 0.5rem 0.7rem;
+            margin: 0.4rem 0;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.72rem;
+            color: #e0c080;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">Gemini 3.1 Flash Live</div>
+    <h1>Voice AI Agent</h1>
+    <p class="subtitle">GHL replacement — real-time conversational AI</p>
+</header>
+
+<div class="container">
+    <div class="orb-wrap">
+        <div class="orb" id="orb">
+            <div class="orb-inner"></div>
+        </div>
+    </div>
+
+    <div class="status-badge" id="status">ready</div>
+
+    <div class="controls">
+        <button class="primary" id="startBtn" onclick="startSession()">Start Call</button>
+        <button class="stop" id="stopBtn" onclick="stopSession()" disabled>End Call</button>
+    </div>
+
+    <div class="text-row">
+        <input type="text" id="textInput" placeholder="Or type a message..." disabled>
+        <button id="sendBtn" onclick="sendText()" disabled style="flex:0 0 auto; width: 70px;">Send</button>
+    </div>
+
+    <div class="transcript-label">Transcript</div>
+    <div class="transcript" id="transcript">
+        <div class="msg"><span class="role system">sys</span> Press Start Call to begin.</div>
+    </div>
+</div>
+
+<script>
+// ===================================================================
+// Gemini Live API — Client-side WebSocket with Ephemeral Tokens
+// ===================================================================
+
+const MODEL = 'gemini-3.1-flash-live-preview';
+
+// System prompt — customise per business
+const SYSTEM_PROMPT = `You are a friendly, professional AI receptionist. Your job is to:
+1. Greet callers warmly and identify yourself as the business's AI assistant.
+2. Understand what the caller needs (appointment, information, support).
+3. Use the available tools to help them (check availability, book appointments, capture their details).
+4. If you can't help, offer to transfer them to a human.
+
+RULES:
+- Be concise — this is a phone call, not an essay. Keep responses to 1-2 sentences.
+- Speak naturally, like a real receptionist. Use contractions.
+- Always confirm details before booking.
+- Never make up information.`;
+
+// Function declarations for tool calling
+const TOOLS = [{
+    functionDeclarations: [
+        {
+            name: 'check_availability',
+            description: 'Check available appointment slots for a given date and service type.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    date: { type: 'string', description: 'Date in YYYY-MM-DD format' },
+                    service_type: { type: 'string', description: 'Type of service requested' }
+                },
+                required: ['date']
+            }
+        },
+        {
+            name: 'book_appointment',
+            description: 'Book an appointment for the caller.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    customer_name: { type: 'string', description: 'Full name' },
+                    phone_number: { type: 'string', description: 'Contact phone' },
+                    date: { type: 'string', description: 'YYYY-MM-DD' },
+                    time: { type: 'string', description: 'HH:MM 24h' },
+                    service_type: { type: 'string', description: 'Service type' },
+                    notes: { type: 'string', description: 'Additional notes' }
+                },
+                required: ['customer_name', 'date', 'time']
+            }
+        },
+        {
+            name: 'capture_lead',
+            description: 'Save lead/contact information for follow-up.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    name: { type: 'string', description: 'Full name' },
+                    phone: { type: 'string', description: 'Phone number' },
+                    email: { type: 'string', description: 'Email address' },
+                    interest: { type: 'string', description: 'What they are interested in' }
+                },
+                required: ['name']
+            }
+        },
+        {
+            name: 'transfer_call',
+            description: 'Transfer to a human agent or department.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    department: { type: 'string', description: 'Department name' },
+                    reason: { type: 'string', description: 'Reason for transfer' }
+                },
+                required: ['department']
+            }
+        }
+    ]
+}];
+
+let ws = null;
+let audioContext = null;
+let mediaStream = null;
+let processor = null;
+let playbackQueue = [];
+let isPlaying = false;
+
+const orb = document.getElementById('orb');
+const status = document.getElementById('status');
+const transcript = document.getElementById('transcript');
+
+function log(role, text) {
+    const div = document.createElement('div');
+    div.className = 'msg';
+    div.innerHTML = `<span class="role ${role}">${role}</span> ${text}`;
+    transcript.appendChild(div);
+    transcript.scrollTop = transcript.scrollHeight;
+}
+
+function logTool(name, args, result) {
+    const div = document.createElement('div');
+    div.className = 'tool-msg';
+    div.textContent = `⚡ ${name}(${JSON.stringify(args)}) → ${JSON.stringify(result)}`;
+    transcript.appendChild(div);
+    transcript.scrollTop = transcript.scrollHeight;
+}
+
+function setStatus(text, cls = '') {
+    status.textContent = text;
+    status.className = 'status-badge ' + cls;
+}
+
+// --- Mock tool execution (replace with real CRM/booking API calls) ---
+function executeTool(name, args) {
+    switch (name) {
+        case 'check_availability': {
+            const slots = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00'];
+            return { available: true, date: args.date, slots, message: `Available on ${args.date}: ${slots.join(', ')}` };
+        }
+        case 'book_appointment':
+            return { success: true, message: `Booked for ${args.customer_name} on ${args.date} at ${args.time}.` };
+        case 'capture_lead':
+            return { success: true, message: `Saved contact info for ${args.name}.` };
+        case 'transfer_call':
+            return { success: true, message: `Transferring to ${args.department}.`, action: 'transfer' };
+        default:
+            return { error: `Unknown tool: ${name}` };
+    }
+}
+
+// --- Session lifecycle ---
+
+async function startSession() {
+    setStatus('connecting...', '');
+    document.getElementById('startBtn').disabled = true;
+
+    try {
+        // Step 1: Get ephemeral token from our serverless function
+        const tokenRes = await fetch('/api/token', { method: 'POST' });
+        if (!tokenRes.ok) {
+            const err = await tokenRes.json();
+            throw new Error(err.error || 'Token request failed');
+        }
+        const { token, model } = await tokenRes.json();
+
+        // Step 2: Connect to Gemini Live via WebSocket using ephemeral token
+        const wsUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained?access_token=${token}`;
+        ws = new WebSocket(wsUrl);
+
+        ws.onopen = async () => {
+            // Step 3: Send session config
+            const config = {
+                config: {
+                    model: `models/${model}`,
+                    responseModalities: ['AUDIO'],
+                    systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+                    tools: TOOLS,
+                    speechConfig: {
+                        voiceConfig: {
+                            prebuiltVoiceConfig: { voiceName: 'Kore' }
+                        }
+                    },
+                    inputAudioTranscription: {},
+                    outputAudioTranscription: {},
+                }
+            };
+            ws.send(JSON.stringify(config));
+            setStatus('connected — listening', 'active');
+            orb.className = 'orb listening';
+            log('system', 'Connected. Speak or type your message.');
+
+            document.getElementById('stopBtn').disabled = false;
+            document.getElementById('textInput').disabled = false;
+            document.getElementById('sendBtn').disabled = false;
+
+            // Step 4: Start microphone
+            await startMic();
+        };
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            handleGeminiMessage(data);
+        };
+
+        ws.onclose = () => {
+            setStatus('disconnected', '');
+            orb.className = 'orb';
+            stopMic();
+            resetUI();
+        };
+
+        ws.onerror = (e) => {
+            setStatus('connection error', 'error');
+            log('system', 'WebSocket error. Check your API key.');
+            orb.className = 'orb';
+            resetUI();
+        };
+
+    } catch (err) {
+        setStatus('error: ' + err.message, 'error');
+        log('system', 'Failed: ' + err.message);
+        resetUI();
+    }
+}
+
+function stopSession() {
+    stopMic();
+    if (ws) { ws.close(); ws = null; }
+    setStatus('ended', '');
+    orb.className = 'orb';
+    log('system', 'Call ended.');
+    resetUI();
+}
+
+function resetUI() {
+    document.getElementById('startBtn').disabled = false;
+    document.getElementById('stopBtn').disabled = true;
+    document.getElementById('textInput').disabled = true;
+    document.getElementById('sendBtn').disabled = true;
+}
+
+// --- Handle messages from Gemini ---
+
+function handleGeminiMessage(data) {
+    // Server content (audio + transcription)
+    if (data.serverContent) {
+        const content = data.serverContent;
+
+        // Audio response
+        if (content.modelTurn && content.modelTurn.parts) {
+            orb.className = 'orb speaking';
+            for (const part of content.modelTurn.parts) {
+                if (part.inlineData && part.inlineData.data) {
+                    playAudioChunk(part.inlineData.data);
+                }
+            }
+        }
+
+        // Turn complete
+        if (content.turnComplete) {
+            orb.className = 'orb listening';
+        }
+
+        // Transcriptions
+        if (content.inputTranscription && content.inputTranscription.text) {
+            log('user', content.inputTranscription.text);
+        }
+        if (content.outputTranscription && content.outputTranscription.text) {
+            log('agent', content.outputTranscription.text);
+        }
+    }
+
+    // Tool calls
+    if (data.toolCall) {
+        handleToolCalls(data.toolCall);
+    }
+}
+
+function handleToolCalls(toolCall) {
+    const functionResponses = [];
+
+    for (const fc of toolCall.functionCalls) {
+        const result = executeTool(fc.name, fc.args || {});
+        logTool(fc.name, fc.args || {}, result);
+        functionResponses.push({
+            id: fc.id,
+            name: fc.name,
+            response: result
+        });
+    }
+
+    // Send tool responses back to Gemini
+    ws.send(JSON.stringify({
+        toolResponse: { functionResponses }
+    }));
+}
+
+// --- Microphone ---
+
+async function startMic() {
+    try {
+        audioContext = new AudioContext({ sampleRate: 16000 });
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+                sampleRate: 16000,
+                channelCount: 1,
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true,
+            }
+        });
+
+        const source = audioContext.createMediaStreamSource(mediaStream);
+        processor = audioContext.createScriptProcessor(4096, 1, 1);
+
+        processor.onaudioprocess = (e) => {
+            if (!ws || ws.readyState !== WebSocket.OPEN) return;
+            const float32 = e.inputBuffer.getChannelData(0);
+            const int16 = new Int16Array(float32.length);
+            for (let i = 0; i < float32.length; i++) {
+                const s = Math.max(-1, Math.min(1, float32[i]));
+                int16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+            }
+            const b64 = arrayBufferToBase64(int16.buffer);
+            ws.send(JSON.stringify({
+                realtimeInput: {
+                    audio: { data: b64, mimeType: 'audio/pcm;rate=16000' }
+                }
+            }));
+        };
+
+        source.connect(processor);
+        processor.connect(audioContext.destination);
+    } catch (err) {
+        log('system', 'Mic access denied: ' + err.message);
+    }
+}
+
+function stopMic() {
+    if (processor) { processor.disconnect(); processor = null; }
+    if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; }
+    if (audioContext && audioContext.state !== 'closed') { audioContext.close(); audioContext = null; }
+}
+
+// --- Audio Playback (PCM 24kHz from Gemini) ---
+
+function playAudioChunk(base64Data) {
+    playbackQueue.push(base64Data);
+    if (!isPlaying) drainPlaybackQueue();
+}
+
+async function drainPlaybackQueue() {
+    if (playbackQueue.length === 0) { isPlaying = false; return; }
+    isPlaying = true;
+    const b64 = playbackQueue.shift();
+    const bytes = base64ToArrayBuffer(b64);
+    const int16 = new Int16Array(bytes);
+
+    const ctx = new AudioContext({ sampleRate: 24000 });
+    const buffer = ctx.createBuffer(1, int16.length, 24000);
+    const channel = buffer.getChannelData(0);
+    for (let i = 0; i < int16.length; i++) {
+        channel[i] = int16[i] / 32768.0;
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buffer;
+    src.connect(ctx.destination);
+    src.onended = () => { ctx.close(); drainPlaybackQueue(); };
+    src.start();
+}
+
+// --- Text input ---
+
+function sendText() {
+    const input = document.getElementById('textInput');
+    const text = input.value.trim();
+    if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
+    ws.send(JSON.stringify({ clientContent: { turns: [{ role: 'user', parts: [{ text }] }], turnComplete: true } }));
+    log('user', text);
+    input.value = '';
+}
+
+document.getElementById('textInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') sendText();
+});
+
+// --- Helpers ---
+
+function arrayBufferToBase64(buffer) {
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary);
+}
+
+function base64ToArrayBuffer(base64) {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes.buffer;
+}
+</script>
+</body>
+</html>
