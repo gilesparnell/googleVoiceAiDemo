@@ -4,5 +4,8 @@
     { "src": "api/*.py", "use": "@vercel/python" },
     { "src": "public/**", "use": "@vercel/static" }
   ],
-  "rewrites": [{ "source": "/(.*)", "destination": "/public/index.html" }]
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*)", "dest": "/public/index.html" }
+  ]
 }
