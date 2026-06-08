@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gemini Chat Demo — Project Docs</title>
+  <meta name="description" content="Gemini AI chat demo with 5 niche presets — AI receptionist showcase for client sales demos.">
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap">
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{--font-display:'Satoshi',-apple-system,BlinkMacSystemFont,sans-serif;--font-body:'Outfit',-apple-system,BlinkMacSystemFont,sans-serif;--bg-deep:#0a0c10;--bg-surface:#12151c;--bg-raised:#1a1e28;--text-primary:#e8eaf0;--text-secondary:#8b92a8;--text-tertiary:#4a5068;--accent:#38bfa0;--accent-light:#5edcb8;--accent-muted:rgba(56,191,160,0.15);--accent-glow:rgba(56,191,160,0.20);--warm:#e8a44a;--warm-muted:rgba(232,164,74,0.12);--blue:#6199e6;--blue-muted:rgba(97,153,230,0.12);--purple:#a78bfa;--purple-muted:rgba(167,139,250,0.12);--coral:#f07b6e;--coral-muted:rgba(240,123,110,0.12);--green:#34d399;--green-muted:rgba(52,211,153,0.12);--border:rgba(255,255,255,0.06);--border-hover:rgba(255,255,255,0.14);--radius:20px}
+    body{font-family:var(--font-body);background:var(--bg-deep);color:var(--text-primary);line-height:1.6;letter-spacing:-0.01em;min-height:100vh;overflow-x:hidden}
+    a{color:inherit;text-decoration:none}
+    .mesh-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+    .mesh-bg .blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:0.5;will-change:transform}
+    .mesh-bg .blob:nth-child(1){width:650px;height:650px;background:hsla(168,55%,32%,0.35);top:-12%;left:-8%;animation:d1 20s ease-in-out infinite alternate}
+    .mesh-bg .blob:nth-child(2){width:500px;height:500px;background:hsla(215,55%,30%,0.28);top:5%;right:-12%;animation:d2 24s ease-in-out infinite alternate}
+    .mesh-bg .blob:nth-child(3){width:580px;height:580px;background:hsla(270,45%,28%,0.22);bottom:-18%;left:25%;animation:d3 28s ease-in-out infinite alternate}
+    .mesh-bg .blob:nth-child(4){width:400px;height:400px;background:hsla(40,50%,30%,0.15);bottom:10%;right:5%;animation:d4 22s ease-in-out infinite alternate}
+    @keyframes d1{to{transform:translate(90px,70px) scale(1.08)}}
+    @keyframes d2{to{transform:translate(-70px,90px) scale(0.92)}}
+    @keyframes d3{to{transform:translate(50px,-60px) scale(1.12)}}
+    @keyframes d4{to{transform:translate(-40px,-50px) scale(1.06)}}
+    .page{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:3rem 2rem 4rem}
+    .site-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:3rem}
+    .brand{display:flex;align-items:center;gap:14px;text-decoration:none}
+    .brand-mark{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#2a8a74);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:900;font-size:1.2rem;color:#fff;letter-spacing:-0.03em}
+    .brand-text{font-family:var(--font-display);font-weight:700;font-size:1.25rem;letter-spacing:-0.03em}
+    .header-links{display:flex;align-items:center;gap:1.25rem}
+    .header-links a{color:var(--text-secondary);text-decoration:none;font-size:0.85rem;font-weight:500;transition:color 0.2s;display:flex;align-items:center;gap:6px}
+    .header-links a:hover{color:var(--text-primary)}
+    .header-links svg{width:18px;height:18px;fill:currentColor}
+    .hero{margin-bottom:3.5rem}
+    .hero .label{font-family:var(--font-body);font-size:0.7rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:0.75rem;display:flex;align-items:center;gap:10px}
+    .hero h1{font-family:var(--font-display);font-size:clamp(2.5rem,5.5vw,4.2rem);font-weight:900;line-height:1.05;letter-spacing:-0.04em;margin-bottom:1rem}
+    .hero .tagline{font-size:clamp(1rem,2vw,1.2rem);color:var(--text-secondary);max-width:640px;line-height:1.65}
+    .badge{display:inline-flex;align-items:center;gap:5px;font-size:0.62rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:3px 10px;border-radius:100px}
+    .badge--active{background:rgba(52,211,153,0.12);color:#34d399}
+    .badge--active::before{content:'';width:5px;height:5px;background:#34d399;border-radius:50%;animation:pulse 2.5s ease-in-out infinite}
+    @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(52,211,153,0.4)}50%{box-shadow:0 0 0 5px rgba(52,211,153,0)}}
+    .stats-row{display:flex;gap:2.5rem;margin-top:1.5rem;flex-wrap:wrap}
+    .stat{display:flex;flex-direction:column}
+    .stat-value{font-family:var(--font-display);font-weight:900;font-size:1.8rem;letter-spacing:-0.03em;color:var(--accent);line-height:1}
+    .stat-label{font-size:0.72rem;color:var(--text-tertiary);margin-top:4px;font-weight:500}
+    .section-label{font-family:var(--font-body);font-size:0.65rem;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:1.25rem;padding-left:2px}
+    .bento{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .card{background:rgba(18,21,28,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:var(--radius);padding:1.6rem;position:relative;overflow:hidden;display:flex;flex-direction:column;text-decoration:none;color:inherit;transition:transform 0.45s cubic-bezier(0.16,1,0.3,1),box-shadow 0.45s cubic-bezier(0.16,1,0.3,1),border-color 0.4s ease}
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);pointer-events:none;z-index:2}
+    .card::after{content:'';position:absolute;width:350px;height:350px;background:radial-gradient(circle,var(--card-glow,var(--accent-glow)) 0%,transparent 70%);border-radius:50%;pointer-events:none;opacity:0;transition:opacity 0.4s ease;top:var(--mouse-y,50%);left:var(--mouse-x,50%);transform:translate(-50%,-50%);z-index:1}
+    .card:hover::after{opacity:1}
+    .card:hover{transform:translateY(-3px) scale(1.008);border-color:var(--border-hover);box-shadow:0 24px 64px rgba(0,0,0,0.35),0 0 48px var(--card-glow,var(--accent-muted))}
+    .card--wide{grid-column:span 2}
+    .card-top{flex:1;position:relative;z-index:3}
+    .card h2{font-family:var(--font-display);font-weight:700;font-size:1.15rem;line-height:1.2;letter-spacing:-0.025em;margin-bottom:0.5rem}
+    .card p{color:var(--text-secondary);font-size:0.88rem;line-height:1.6}
+    .card-footer{margin-top:auto;padding-top:1.25rem;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:3}
+    .card-link{display:inline-flex;align-items:center;gap:6px;color:var(--accent);font-weight:500;font-size:0.85rem;transition:gap 0.3s ease,color 0.3s ease}
+    .card-link:hover{gap:10px;color:var(--accent-light)}
+    .card-icon{font-size:1.5rem;margin-bottom:0.75rem;display:block}
+    .card-count{font-size:0.7rem;font-weight:600;letter-spacing:0.06em;color:var(--text-tertiary);background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:100px;padding:2px 10px}
+    .doc-list{list-style:none;margin-top:0.75rem;display:flex;flex-direction:column;gap:4px}
+    .doc-list li{font-size:0.78rem;color:var(--text-secondary);display:flex;align-items:center;gap:8px}
+    .doc-list li::before{content:'';width:4px;height:4px;background:var(--accent);border-radius:50%;flex-shrink:0}
+    .niche-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:0.75rem}
+    .niche-item{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:0.6rem 0.75rem}
+    .niche-name{font-family:var(--font-display);font-size:0.82rem;font-weight:700;color:var(--text-primary);letter-spacing:-0.01em}
+    .niche-desc{font-size:0.72rem;color:var(--text-tertiary);margin-top:2px;line-height:1.4}
+    .code-block{background:rgba(0,0,0,0.35);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem;margin-top:0.75rem;font-family:'JetBrains Mono','Fira Code',monospace;font-size:0.75rem;color:var(--accent-light);line-height:1.7}
+    .code-block .comment{color:var(--text-tertiary)}
+    .site-footer{margin-top:4rem;padding-top:2rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:0.78rem;color:var(--text-tertiary)}
+    .site-footer a{color:var(--text-secondary);text-decoration:none;transition:color 0.2s}
+    .site-footer a:hover{color:var(--accent)}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .hero{animation:fadeUp 0.7s ease-out both}
+    .card{animation:fadeUp 0.6s ease-out both}
+    .bento .card:nth-child(1){animation-delay:0.1s}.bento .card:nth-child(2){animation-delay:0.15s}.bento .card:nth-child(3){animation-delay:0.2s}.bento .card:nth-child(4){animation-delay:0.25s}.bento .card:nth-child(5){animation-delay:0.3s}.bento .card:nth-child(6){animation-delay:0.35s}
+    @media(max-width:900px){.bento{grid-template-columns:repeat(2,1fr)}.card--wide{grid-column:span 2}.niche-grid{grid-template-columns:1fr}}
+    @media(max-width:580px){.bento{grid-template-columns:1fr}.card--wide{grid-column:span 1}.page{padding:2rem 1rem 3rem}.site-header{flex-direction:column;align-items:flex-start;gap:1rem}.site-footer{flex-direction:column;gap:0.75rem;text-align:center}.niche-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="mesh-bg">
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="blob"></div>
+  </div>
+
+  <div class="page">
+    <header class="site-header">
+      <a href="#" class="brand">
+        <div class="brand-mark">G</div>
+        <span class="brand-text">Gemini Chat Demo</span>
+      </a>
+      <nav class="header-links">
+        <a href="https://github.com/gilesparnell/googleVoiceAiDemo" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          GitHub
+        </a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="label">
+        <span class="badge badge--active">Demo Tool</span>
+        Parnell Systems · AI Receptionist Platform
+      </div>
+      <h1>Gemini Chat<br>Demo</h1>
+      <p class="tagline">A live AI receptionist showcase — five industry presets, streaming responses, and editable system prompts. Used to prove value to prospective clients before they sign up for the full voice platform.</p>
+      <div class="stats-row">
+        <div class="stat">
+          <span class="stat-value">v1.0.0</span>
+          <span class="stat-label">Current version</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">5</span>
+          <span class="stat-label">Niche presets</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">Gemini</span>
+          <span class="stat-label">AI engine</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">Node.js</span>
+          <span class="stat-label">Runtime</span>
+        </div>
+      </div>
+    </section>
+
+    <p class="section-label">Project overview</p>
+    <div class="bento">
+
+      <!-- Card 1: What It Is (wide) -->
+      <div class="card card--wide" style="--card-glow:rgba(56,191,160,0.18)">
+        <div class="card-top">
+          <span class="card-icon">🤖</span>
+          <h2>What It Is</h2>
+          <p>A client-facing demo app that puts Google Gemini AI into the role of an industry-specific receptionist. Prospects pick a niche, interact with a streaming AI persona, and edit the underlying system prompt live — seeing exactly how an AI receptionist behaves before committing to the full platform.</p>
+          <p style="margin-top:0.6rem">Built to shorten the sales cycle: instead of describing what an AI receptionist does, show it. Conversations stream in real time via WebSocket, ephemeral tokens keep the Gemini API key off the client, and system prompts are editable in-browser so prospects can customise the persona during the demo itself.</p>
+        </div>
+        <div class="card-footer">
+          <a href="https://github.com/gilesparnell/googleVoiceAiDemo" class="card-link" target="_blank" rel="noopener">View source →</a>
+          <span class="card-count">Sales demo tool</span>
+        </div>
+      </div>
+
+      <!-- Card 2: Niche Presets -->
+      <div class="card" style="--card-glow:rgba(167,139,250,0.18)">
+        <div class="card-top">
+          <span class="card-icon">🎭</span>
+          <h2>Niche Presets</h2>
+          <p>Five ready-to-run industry personas, each with a tailored system prompt and behavioural rules.</p>
+          <div class="niche-grid">
+            <div class="niche-item">
+              <div class="niche-name">Real Estate Agent</div>
+              <div class="niche-desc">Property inquiries, scheduling viewings, neighbourhood info</div>
+            </div>
+            <div class="niche-item">
+              <div class="niche-name">Medical Receptionist</div>
+              <div class="niche-desc">Appointment booking, prescription refills, triage routing</div>
+            </div>
+            <div class="niche-item">
+              <div class="niche-name">Restaurant Host</div>
+              <div class="niche-desc">Reservations, menu questions, hours and specials</div>
+            </div>
+            <div class="niche-item">
+              <div class="niche-name">Legal Intake Specialist</div>
+              <div class="niche-desc">Initial client screening, case type identification, consultation booking</div>
+            </div>
+            <div class="niche-item" style="grid-column:span 2">
+              <div class="niche-name">Fitness &amp; Wellness Coach</div>
+              <div class="niche-desc">Workout guidance, nutrition tips, programme recommendations</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="card-count">5 presets</span>
+        </div>
+      </div>
+
+      <!-- Card 3: Architecture -->
+      <div class="card" style="--card-glow:rgba(97,153,230,0.18)">
+        <div class="card-top">
+          <span class="card-icon">⚙️</span>
+          <h2>Architecture</h2>
+          <p>Lightweight Express server purpose-built for live demos — no database, stateless by design.</p>
+          <ul class="doc-list">
+            <li>Node.js + Express HTTP server</li>
+            <li>Google Gemini API for chat generation</li>
+            <li>WebSocket streaming — responses arrive token by token</li>
+            <li>Ephemeral token auth — Gemini API key stays server-side</li>
+            <li>Editable system prompts — hot-swapped per conversation</li>
+            <li>Single-file niche config (<code style="font-size:0.72rem;color:var(--accent-light)">niches.js</code>)</li>
+          </ul>
+        </div>
+        <div class="card-footer">
+          <span class="card-count">Stateless · No DB</span>
+        </div>
+      </div>
+
+      <!-- Card 4: How to Run -->
+      <div class="card" style="--card-glow:rgba(52,211,153,0.18)">
+        <div class="card-top">
+          <span class="card-icon">🚀</span>
+          <h2>How to Run</h2>
+          <p>Up and running in under a minute. Requires a Google AI Studio API key.</p>
+          <div class="code-block">
+            <span class="comment"># 1. Install dependencies</span><br>
+            npm install<br><br>
+            <span class="comment"># 2. Set your Gemini API key</span><br>
+            export GEMINI_API_KEY=your_key_here<br><br>
+            <span class="comment"># 3. Start the server</span><br>
+            npm start<br><br>
+            <span class="comment"># 4. Open in browser</span><br>
+            open http://localhost:3000
+          </div>
+        </div>
+        <div class="card-footer">
+          <a href="https://aistudio.google.com/app/apikey" class="card-link" target="_blank" rel="noopener">Get API key →</a>
+        </div>
+      </div>
+
+      <!-- Card 5: Relationship to Platform -->
+      <div class="card" style="--card-glow:rgba(232,164,74,0.18)">
+        <div class="card-top">
+          <span class="card-icon">🔗</span>
+          <h2>Relationship to Platform</h2>
+          <p>This demo sits at the top of the sales funnel — a low-friction proof of concept that prospects can try without any onboarding commitment.</p>
+          <ul class="doc-list" style="margin-top:0.75rem">
+            <li>Demo only — no production voice infrastructure</li>
+            <li>Text chat, not phone calls (the platform handles real calls)</li>
+            <li>Editable prompts mirror the platform's per-client customisation</li>
+            <li>Niches map directly to platform industry verticals</li>
+            <li>Full platform: telephony, CRM integration, call analytics</li>
+          </ul>
+        </div>
+        <div class="card-footer">
+          <span class="card-count">Pre-sales tool</span>
+        </div>
+      </div>
+
+      <!-- Card 6: Tests -->
+      <div class="card" style="--card-glow:rgba(240,123,110,0.18)">
+        <div class="card-top">
+          <span class="card-icon">🧪</span>
+          <h2>Tests</h2>
+          <p>Test suite lives in <code style="font-size:0.78rem;color:var(--accent-light)">tests/</code>. Covers niche config integrity, server routes, and WebSocket streaming behaviour.</p>
+          <div class="code-block">
+            <span class="comment"># Run the test suite</span><br>
+            npm test
+          </div>
+          <ul class="doc-list" style="margin-top:0.75rem">
+            <li>Niche preset schema validation</li>
+            <li>Express route smoke tests</li>
+            <li>Ephemeral token generation</li>
+            <li>WebSocket message contract</li>
+          </ul>
+        </div>
+        <div class="card-footer">
+          <a href="https://github.com/gilesparnell/googleVoiceAiDemo/tree/main/tests" class="card-link" target="_blank" rel="noopener">View tests →</a>
+        </div>
+      </div>
+
+    </div>
+
+    <footer class="site-footer">
+      <span>Gemini Chat Demo · v1.0.0 · Parnell Systems</span>
+      <div style="display:flex;gap:1.5rem">
+        <a href="https://github.com/gilesparnell/googleVoiceAiDemo" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://parnellsystems.com" target="_blank" rel="noopener">Parnell Systems</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Cursor glow on cards
+    document.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const rect = card.getBoundingClientRect();
+        card.style.setProperty('--mouse-x', (e.clientX - rect.left) + 'px');
+        card.style.setProperty('--mouse-y', (e.clientY - rect.top) + 'px');
+      });
+    });
+  </script>
+</body>
+</html>
