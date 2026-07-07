@@ -137,7 +137,7 @@
           <span class="card-icon">🤖</span>
           <h2>What It Is</h2>
           <p>A client-facing demo app that puts Google Gemini AI into the role of an industry-specific receptionist. Prospects pick a niche, interact with a streaming AI persona, and edit the underlying system prompt live — seeing exactly how an AI receptionist behaves before committing to the full platform.</p>
-          <p style="margin-top:0.6rem">Built to shorten the sales cycle: instead of describing what an AI receptionist does, show it. Conversations stream in real time via WebSocket, ephemeral tokens keep the Gemini API key off the client, and system prompts are editable in-browser so prospects can customise the persona during the demo itself.</p>
+          <p style="margin-top:0.6rem">Built to shorten the sales cycle: instead of describing what an AI receptionist does, show it. Conversations stream in real time via WebSocket, API credentials stay server-side and are never exposed to the browser, and system prompts are editable in-browser so prospects can customise the persona during the demo itself.</p>
         </div>
         <div class="card-footer">
           <a href="https://github.com/gilesparnell/googleVoiceAiDemo" class="card-link" target="_blank" rel="noopener">View source →</a>
@@ -189,7 +189,7 @@
             <li>Node.js + Express HTTP server</li>
             <li>Google Gemini API for chat generation</li>
             <li>WebSocket streaming — responses arrive token by token</li>
-            <li>Ephemeral token auth — Gemini API key stays server-side</li>
+            <li>Secure key handling — API credentials stay server-side, never in the browser</li>
             <li>Editable system prompts — hot-swapped per conversation</li>
             <li>Single-file niche config (<code style="font-size:0.72rem;color:var(--accent-light)">niches.js</code>)</li>
           </ul>
@@ -208,8 +208,8 @@
           <div class="code-block">
             <span class="comment"># 1. Install dependencies</span><br>
             npm install<br><br>
-            <span class="comment"># 2. Set your Gemini API key</span><br>
-            export GEMINI_API_KEY=your_key_here<br><br>
+            <span class="comment"># 2. Add your API key to the env file</span><br>
+            cp .env.example .env<br><br>
             <span class="comment"># 3. Start the server</span><br>
             npm start<br><br>
             <span class="comment"># 4. Open in browser</span><br>
@@ -253,7 +253,7 @@
           <ul class="doc-list" style="margin-top:0.75rem">
             <li>Niche preset schema validation</li>
             <li>Express route smoke tests</li>
-            <li>Ephemeral token generation</li>
+            <li>Server-side auth flow</li>
             <li>WebSocket message contract</li>
           </ul>
         </div>
